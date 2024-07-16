@@ -1,0 +1,14 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    border:5px solid green;
+    height:100svh;
+    display:flex;
+    justify-content: center;
+    align-items:center;
+
+}
