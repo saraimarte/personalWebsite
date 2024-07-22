@@ -32,7 +32,7 @@ let model;
 
 // Load Model
 gltfLoader.load(
-    '../../public/woman.glb',
+    '../../public/me4.glb',
     (gltf) => {
         const material = new THREE.MeshBasicMaterial({ color: 0x00B9E8, wireframe: true });
 
@@ -52,10 +52,10 @@ gltfLoader.load(
         const size = box.getSize(new THREE.Vector3());
 
         // Position the model and camera
-        model.position.y -= size.y / 2;
+        model.position.y -= size.y / 1000;
 
         // Set the camera position in front of the model, higher, and further back
-        const cameraDistance = size.z * 2; // Adjust distance as needed
+        const cameraDistance = size.z * 4; // Adjust distance as needed
         camera.position.set(center.x, center.y + size.y * 0.2, center.z + cameraDistance);
         camera.lookAt(center.x, center.y, center.z);
 
@@ -79,18 +79,18 @@ const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true; // Enable smooth controls
 
 // Set polar angle limits to restrict up and down rotation
-controls.minPolarAngle = Math.PI / 2.2; // Limit the downward angle
+controls.minPolarAngle = Math.PI / 2.1; // Limit the downward angle
 controls.maxPolarAngle = 2 * Math.PI / 3; // Limit the upward angle
 
 // Set azimuth angle limits to allow full 360 degree horizontal rotation
 controls.minAzimuthAngle = -Infinity;
 controls.maxAzimuthAngle = Infinity;
-
 //ANCHOR - Renderer
 const renderer = new THREE.WebGLRenderer({
     canvas: canvas
 });
 renderer.setSize(sizes.width, sizes.height);
+renderer.setClearColor(0xFEFEFA, 1); // Set the background color to #FEFEFA
 
 // Handle window resize
 window.addEventListener('resize', () => {
@@ -137,10 +137,12 @@ const clock = new THREE.Clock();
 const tick = () => {
     const elapsedTime = clock.getElapsedTime();
 
+    /*
     // Update model rotation if it's loaded
     if (model) {
         model.rotation.y = elapsedTime;
     }
+    */
 
     // Update particle rotation
     const particleSystem = scene.children.find(child => child instanceof THREE.Points);
