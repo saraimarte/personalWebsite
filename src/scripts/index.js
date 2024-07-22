@@ -32,16 +32,35 @@ let model;
 
 // Load Model
 gltfLoader.load(
-    '../../public/me4.glb',
+    '../../public/me7.glb',
     (gltf) => {
         const material = new THREE.MeshBasicMaterial({ color: 0x00B9E8, wireframe: true });
+        const materialString = new THREE.MeshBasicMaterial({ color: 0xE52B50 });
+
+        const materials = {
+            'me': new THREE.MeshBasicMaterial({ color: 0x00B9E8, wireframe: true }),
+            'icons': new THREE.MeshBasicMaterial({ color: 0xFF0000 }), // Example color
+            'string': new THREE.MeshBasicMaterial({ color: 0x00FF00 }) // Example color
+        };
 
         // Traverse through the model's scene to find all mesh objects
         gltf.scene.traverse((child) => {
             if (child.isMesh) {
-                child.material = material;
+                const material = materials[child.name];
+                if (material) {
+                    child.material = material;
+                }
             }
         });
+      
+        // Print the child models
+        console.log("Child models:");
+        gltf.scene.traverse((child) => {
+            console.log(child);
+        });
+
+        model = gltf.scene;
+        scene.add(model);
 
         model = gltf.scene;
         scene.add(model);
@@ -68,7 +87,6 @@ gltfLoader.load(
     }
 );
 
-console.log("Woman Model Attribution: Women/Female Body Base Rigged (https://skfb.ly/orItY) by camilooh is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).");
 
 //ANCHOR - Camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
