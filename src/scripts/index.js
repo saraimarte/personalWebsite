@@ -11,13 +11,13 @@ dracoLoader.setDecoderPath('draco/');
 const gltfLoader = new GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader);
 
-//ANCHOR - Canvas
+// ANCHOR - Canvas
 const canvas = document.querySelector('canvas.webgl');
 
-//ANCHOR - Scene
+// ANCHOR - Scene
 const scene = new THREE.Scene();
 
-//ANCHOR - Sizes
+// ANCHOR - Sizes
 const sizes = {
     width: window.innerWidth,
     height: window.innerHeight
@@ -29,14 +29,12 @@ scene.add(ambientLight);
 
 // Variable to store the loaded model
 let model;
+let meMesh, stringMesh, pivot;
 
 // Load Model
 gltfLoader.load(
-    '../../public/me7.glb',
+    '../../public/me9.glb',
     (gltf) => {
-        const material = new THREE.MeshBasicMaterial({ color: 0x00B9E8, wireframe: true });
-        const materialString = new THREE.MeshBasicMaterial({ color: 0xE52B50 });
-
         const materials = {
             'me': new THREE.MeshBasicMaterial({ color: 0x00B9E8, wireframe: true }),
             'icons': new THREE.MeshBasicMaterial({ color: 0xFF0000 }), // Example color
@@ -50,17 +48,27 @@ gltfLoader.load(
                 if (material) {
                     child.material = material;
                 }
+                if (child.name === 'Me') {
+                    meMesh = child;
+                }
+                if (child.name === 'String') {
+                    stringMesh = child;
+                }
             }
         });
-      
+
         // Print the child models
         console.log("Child models:");
         gltf.scene.traverse((child) => {
             console.log(child);
         });
 
-        model = gltf.scene;
-        scene.add(model);
+        // Create a pivot object and add the stringMesh to it
+        if (meMesh && stringMesh) {
+            pivot = new THREE.Object3D();
+            pivot.add(stringMesh);
+            meMesh.add(pivot);
+        }
 
         model = gltf.scene;
         scene.add(model);
@@ -81,14 +89,10 @@ gltfLoader.load(
         // Update controls target
         controls.target.set(-0.0001, 0.05, 0);
         controls.update();
-
-        // Create the particle swirl
-        createParticleSwirl(center, size);
     }
 );
 
-
-//ANCHOR - Camera
+// ANCHOR - Camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
 scene.add(camera);
 
@@ -103,7 +107,8 @@ controls.maxPolarAngle = 2 * Math.PI / 3; // Limit the upward angle
 // Set azimuth angle limits to allow full 360 degree horizontal rotation
 controls.minAzimuthAngle = -Infinity;
 controls.maxAzimuthAngle = Infinity;
-//ANCHOR - Renderer
+
+// ANCHOR - Renderer
 const renderer = new THREE.WebGLRenderer({
     canvas: canvas
 });
@@ -121,51 +126,16 @@ window.addEventListener('resize', () => {
     renderer.setSize(sizes.width, sizes.height);
 });
 
-//ANCHOR - Create Particle Swirl
-const createParticleSwirl = (center, size) => {
-    const particleCount = 2000;
-    const particles = new THREE.BufferGeometry();
-    const particlePositions = new Float32Array(particleCount * 3);
-
-    for (let i = 0; i < particleCount; i++) {
-        const angle = i * 0.2; // Adjust the spacing between particles
-        const radius = 0.1 + 0.5 * Math.sin(angle * 0.1); // Adjust the radius growth as needed
-        const y = size.y * 0.5 * Math.cos(angle * 0.05) - 0.5 * size.y; // Adjust the height spread as needed
-        particlePositions[i * 3] = center.x + radius * Math.cos(angle);
-        particlePositions[i * 3 + 1] = center.y + y;
-        particlePositions[i * 3 + 2] = center.z + radius * Math.sin(angle);
-    }
-
-    particles.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-
-    const particleMaterial = new THREE.PointsMaterial({
-        color: 0xffffff, // Adjust the particle color
-        size: 0.02 // Adjust the particle size
-    });
-
-    const particleSystem = new THREE.Points(particles, particleMaterial);
-    scene.add(particleSystem);
-
-    return particleSystem;
-};
-
-//ANCHOR - Animate
+// ANCHOR - Animate
 const clock = new THREE.Clock();
 
 const tick = () => {
     const elapsedTime = clock.getElapsedTime();
 
-    /*
-    // Update model rotation if it's loaded
-    if (model) {
-        model.rotation.y = elapsedTime;
-    }
-    */
-
-    // Update particle rotation
-    const particleSystem = scene.children.find(child => child instanceof THREE.Points);
-    if (particleSystem) {
-        particleSystem.rotation.y = elapsedTime * 0.5; // Adjust the rotation speed as needed
+    // Rotate the pivot object around the y-axis
+    if (pivot) {
+        pivot.rotation.y = elapsedTime; // Adjust rotation speed as needed
+        pivot.rotation.z = Math.PI / 50; // Tilt the pivot 45 degrees
     }
 
     // Update controls
@@ -179,4 +149,3 @@ const tick = () => {
 };
 
 tick();
-
